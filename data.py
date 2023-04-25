@@ -2,20 +2,32 @@ import os
 import zipfile
 import numpy as np
 import PIL.Image as Image
-import torchvision.datasets as datasets
-import torchvision.transforms as transforms
-import albumentations as A
-import albumentations.pytorch as AT
-from torch.utils.data import Dataset, DataLoader
+import matplotlib.pyplot as plt
+from torchvision import transforms
+from torch.utils.data import Dataset
 from torch.hub import download_url_to_file
+from config import DATASET_URL
 
-DATASET_URL = 'http://images.cocodataset.org/zips/train2014.zip'
-
-# Define the transform to normalize the data
-transform = A.Compose([
-    A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    AT.ToTensorV2(),
+DATASET_TRANSFORM = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(256),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
+
+GENERAL_TRANSFORM = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+
+INV_NORMALIZE = transforms.Normalize(
+    mean=[-0.485 / 0.229, -0.456 / 0.224, -0.406 / 0.255],
+    std=[1 / 0.229, 1 / 0.224, 1 / 0.255]
+)
+
+def load_img(path):
+    img = Image.open(path).convert('RGB')
+    return img
 
 class CustomDataset(Dataset):
     def __init__(self, path):
@@ -47,10 +59,11 @@ class CustomDataset(Dataset):
     def __getitem__(self, index):
         file, label = self.data[index]
         dir = os.path.join(self.root, self.classes[label])
-        img = np.array(Image.open(os.path.join(dir, file)))
-        img = transform(image=img)["image"]
-        return img
+        return DATASET_TRANSFORM(load_img(os.path.join(dir, file)))
 
 if __name__ == '__main__':
     cd = CustomDataset('dataset')
-    print(cd.__getitem__(0).shape)
+    img = cd[0]
+    print(img.shape)
+    plt.imshow(np.moveaxis(img.cpu().detach().numpy(), 0, -1))
+    plt.show()
