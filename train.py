@@ -95,12 +95,12 @@ def main():
         tqdm_loader = tqdm(loader, leave=True)
         for batch in tqdm_loader:
             loss, content_loss, style_loss, tv_loss = train_batch(net, optimizer, batch)
-            losses.append(loss)
-            content_losses.append(content_loss)
-            style_losses.append(style_loss)
-            tv_losses.append(tv_loss)
 
             if config.SAVE and (batch_count % config.SAVE_FREQ) == 0:
+                losses.append(loss)
+                content_losses.append(content_loss)
+                style_losses.append(style_loss)
+                tv_losses.append(tv_loss)
                 save(config.CHECKPOINT_FILE, net, optimizer, loss, content_loss, style_loss, tv_loss)
                 np.savetxt(config.LOSSES_FILE, np.column_stack((losses, content_losses, style_losses, tv_losses)), delimiter=',', fmt='%s', header='loss, content_loss, style_loss, tv_loss')
 

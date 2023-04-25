@@ -20,15 +20,15 @@ def test_net(net, prefix='', folder='test_images'):
         content_img = GENERAL_TRANSFORM(content_img).unsqueeze(0).to(DEVICE)
         with torch.no_grad():
             stylized = net(content_img)
-            save_image(INV_NORMALIZE(stylized), f'{folder}_output/{prefix}upscaled_' + file)
+            save_image(INV_NORMALIZE(stylized), f'{folder}_output/{prefix}stylized_' + file)
     net.train()
 
-def create_gif(contains='', folder='test_output', skip=0, start=0, num_frames=None):
+def create_gif(contains='', folder='test_images_output', skip=0, start=0, num_frames=None):
     files = os.listdir(folder)
     files = [file for file in files if contains in file]
     sorted_files = sorted(files, key = lambda x: int(x.split("_")[0]))
     imgs = [np.array(Image.open(os.path.join(folder, sorted_files[i]))) for i in range(start, min(len(sorted_files), start + num_frames * (skip + 1)), skip + 1)]
-    imageio.mimsave(f'test_output/generated{contains}.gif', imgs, duration=0.2)
+    imageio.mimsave(f'{folder}/generated{contains}.gif', imgs, duration=(5/num_frames))
 
 def main():
     net = Net().to(DEVICE)
