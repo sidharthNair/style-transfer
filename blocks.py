@@ -16,7 +16,8 @@ class ConvBlock(nn.Module):
             kernel_size=kernel_size,
             stride=stride,
             padding=(kernel_size // 2),
-            bias=(not batch_norm)
+            bias=(not batch_norm),
+            padding_mode='reflect'
         ))
 
         if batch_norm:
